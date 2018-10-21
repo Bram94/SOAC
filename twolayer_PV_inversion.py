@@ -4,13 +4,22 @@ Created on Mon Oct 15 11:19:12 2018
 
 @author: bramv
 """
-
+#%%
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+
+mpl.rcParams['axes.titlesize'] = 22
+mpl.rcParams['axes.titleweight'] = 'bold'
+mpl.rcParams['axes.labelsize'] = 22
+for j in ('xtick','ytick'):
+    mpl.rcParams[j+'.labelsize'] = 18
+mpl.rcParams['legend.fontsize'] = 18
 
 
 
-L = 5000e3
+#%%%
+L = 10000e3
 I = 400 #There are I + 1 grid points
 dx = 2 * L / I
 x = np.arange(-L, L+dx, dx)
@@ -59,7 +68,7 @@ def calculate_v(a):
         elif np.max(np.abs(R1)) < convergence_fac * initial_max_v_diff1 and np.max(np.abs(R2)) < convergence_fac * initial_max_v_diff2:
             break
         n += 1
-    print(n, v1.max(), v1.min(), v2.max(), v2.min())
+    #print(n, v1.max(), v1.min(), v2.max(), v2.min())
     return v1, v2, h1, h2, h_p1, h_p2
 
 def calculate_energy_conversion_ratio(v1, v2, h1, h2, h_p1, h_p2):
@@ -68,33 +77,38 @@ def calculate_energy_conversion_ratio(v1, v2, h1, h2, h_p1, h_p2):
     h1_0 = h_p1; h2_0 = h_p2
     P_0 = g * np.sum(h1_0**2 + eps * h2_0**2 + 2 * eps * h1_0 * h2_0)
     K_g = np.mean(h1) * np.sum(v1**2) + eps * np.mean(h2) * np.sum(v2**2)
-    
-    print(P_0, P_g, K_g)
-    print(np.mean(h1), np.sum(v1**2), np.mean(h2), np.sum(v2**2))
     return K_g / (P_0 - P_g)
 
-"""
-v1, v2, h1, h2, _, _ = calculate_v(a = 800e3)
 
 
-plt.figure()
-plt.plot(x[1:-1] / 1000., (v1[2:] - v1[:-2]) / (2 * dx), x[1:-1] / 1000., (v2[2:] - v2[:-2]) / (2 * dx))
-plt.show()
-"""  
-
-
-scale_factors = np.power(10, np.arange(-2., 7.001, 1))
-a_array = scale_factors * R_rossby
-energy_conversion_ratios = np.zeros(len(a_array))
-for i in range(0, len(a_array)):
-    L = a_array[i]*5
-    dx = 2 * L / I
-    x = np.arange(-L, L+dx, dx)
-
-    v1, v2, h1, h2, h_p1, h_p2 = calculate_v(a_array[i])
+if __name__ == '__main__': #This part is only executed if this script runs as the main script, 
+#not when it is imported from another script
     
-    energy_conversion_ratios[i] = calculate_energy_conversion_ratio(v1, v2, h1, h2, h_p1, h_p2)
+    """
+    v1, v2, h1, h2, _, _ = calculate_v(a = 800e3)
     
-plt.figure()
-plt.semilogx(scale_factors, energy_conversion_ratios)
-plt.show()
+    plt.figure()
+    plt.plot(x[1:-1] / 1000., (v1[2:] - v1[:-2]) / (2 * dx), x[1:-1] / 1000., (v2[2:] - v2[:-2]) / (2 * dx))
+    plt.show()
+    """
+    #%%
+    I = 1000
+    scale_factors = np.power(10, np.arange(-2., 3.001, 0.25))
+    a_array = scale_factors * R_rossby
+    energy_conversion_ratios = np.zeros(len(a_array))
+    for i in range(0, len(a_array)):
+        L = a_array[i]*5
+        dx = 2 * L / I
+        x = np.arange(-L, L+dx, dx)
+    
+        v1, v2, h1, h2, h_p1, h_p2 = calculate_v(a_array[i])
+        
+        energy_conversion_ratios[i] = calculate_energy_conversion_ratio(v1, v2, h1, h2, h_p1, h_p2)
+       
+    #%%
+    plt.figure(figsize = (10, 7))
+    plt.semilogx(scale_factors, energy_conversion_ratios)
+    plt.xlabel('a/R'); plt.ylabel('K / $\Delta$P')
+    plt.title('Energy conversion ratio as a function of a/R')
+    plt.savefig('2layer_energy_conversion_ratios.jpg', dpi = 240, bbox_inches = 'tight')
+    plt.show()
