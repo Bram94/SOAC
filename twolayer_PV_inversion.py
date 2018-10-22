@@ -12,6 +12,7 @@ import matplotlib as mpl
 mpl.rcParams['axes.titlesize'] = 22
 mpl.rcParams['axes.titleweight'] = 'bold'
 mpl.rcParams['axes.labelsize'] = 22
+mpl.rcParams['axes.labelweight'] = 'bold'
 for j in ('xtick','ytick'):
     mpl.rcParams[j+'.labelsize'] = 18
 mpl.rcParams['legend.fontsize'] = 18
@@ -19,11 +20,6 @@ mpl.rcParams['legend.fontsize'] = 18
 
 
 #%%%
-L = 10000e3
-I = 400 #There are I + 1 grid points
-dx = 2 * L / I
-x = np.arange(-L, L+dx, dx)
-
 Q_max = 0.1
 eps = 0.9
 
@@ -32,6 +28,7 @@ f = 1e-4
 t_flux = 600.
 H1 = H2 = 1000.
 R_rossby = 1. / f * np.sqrt(2 * (1 - eps) / (1 + eps) * g * H1 * H2 / (H1 + H2))
+print(R_rossby)
         
 
 
@@ -44,13 +41,13 @@ def calculate_v(a):
     h1 = H1 + h_p1 ; h2 = H2 + h_p2
     zeta_pot1 = f / h1; zeta_pot2 = f / h2
     
-    v1 = np.zeros(I+1); v2 = np.zeros(I+1)
+    v1 = np.zeros(I); v2 = np.zeros(I)
     n = 0
     convergence_fac = 1e-3
     while True:
         #Assume that v remains zero at the boundaries x = -L and x = +L
         R1 = np.zeros(I); R2 = R1.copy()
-        for i in range(1, I):
+        for i in range(1, I-1):
             h1[i] = ((v1[i+1] - v1[i-1]) / (2 * dx) + f) / zeta_pot1[i]
             h2[i] = ((v2[i+1] - v2[i-1]) / (2 * dx) + f) / zeta_pot2[i]
             
@@ -83,16 +80,28 @@ def calculate_energy_conversion_ratio(v1, v2, h1, h2, h_p1, h_p2):
 
 if __name__ == '__main__': #This part is only executed if this script runs as the main script, 
 #not when it is imported from another script
-    
-    """
-    v1, v2, h1, h2, _, _ = calculate_v(a = 800e3)
-    
-    plt.figure()
-    plt.plot(x[1:-1] / 1000., (v1[2:] - v1[:-2]) / (2 * dx), x[1:-1] / 1000., (v2[2:] - v2[:-2]) / (2 * dx))
-    plt.show()
-    """
+    if True:
+        #%%
+        a = 800e3 / 1000.
+        L = a * 5
+        I = 400 #There are I grid points
+        dx = 2 * L / I
+        x = np.arange(-L, L+dx, dx)
+        I = len(x) #Could differ by 1 from the value set above, depending on rounding effects
+        
+        v1, v2, h1, h2, h_p1, h_p2 = calculate_v(a)
+        
+        #%%
+        fig, ax = plt.subplots(3, 1, figsize = (10, 20))
+        x = x / 1000.
+        data_plot = (x >= -100) & (x <= 100)
+        ax[0].plot(x[data_plot][1:-1], (v1[data_plot][2:] - v1[data_plot][:-2]) / (2 * dx), x[data_plot][1:-1], (v2[data_plot][2:] - v2[data_plot][:-2]) / (2 * dx))
+        ax[1].plot(x[data_plot], H1 + h_p1[data_plot], 'b--', x[data_plot], h1[data_plot], 'b-')
+        ax[2].plot(x[data_plot], H2 + h_p2[data_plot], 'r--', x[data_plot], h2[data_plot], 'r-')
+        plt.show()
+
     #%%
-    I = 1000
+    I = 400
     scale_factors = np.power(10, np.arange(-2., 3.001, 0.25))
     a_array = scale_factors * R_rossby
     energy_conversion_ratios = np.zeros(len(a_array))
@@ -108,6 +117,7 @@ if __name__ == '__main__': #This part is only executed if this script runs as th
     #%%
     plt.figure(figsize = (10, 7))
     plt.semilogx(scale_factors, energy_conversion_ratios)
+    plt.ylim([0.0, 0.5])
     plt.xlabel('a/R'); plt.ylabel('K / $\Delta$P')
     plt.title('Energy conversion ratio as a function of a/R')
     plt.savefig('2layer_energy_conversion_ratios.jpg', dpi = 240, bbox_inches = 'tight')

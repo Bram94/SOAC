@@ -25,7 +25,7 @@ L = 180000e3
 I = 7200 #There are I grid points
 dx = 2 * L / (I - 1)
 x = np.arange(-L, L+dx, dx)
-I = len(x) #Could differ by 1 from the value set above, depending on rounding effects5
+I = len(x) #Could differ by 1 from the value set above, depending on rounding effects
 
 a = 800e3
 Q_max = 0.1
@@ -112,6 +112,12 @@ zeta1, zeta2, delta1, delta2, phi1, phi2, h1, h2 = y
 
 x /= 1000.
 #%%
+pv.L = 10000e3
+pv.I = 400 #There are I grid points
+pv.dx = 2 * pv.L / pv.I
+pv.x = np.arange(-pv.L, pv.L+pv.dx, pv.dx)
+pv.I = len(pv.x) #Could differ by 1 from the value set above, depending on rounding effects
+
 x_pv = pv.x / 1000.
 v1_pv, v2_pv, h1_pv, h2_pv, _, _ = pv.calculate_v(a)
 zeta1_pv = (v1_pv[2:] - v1_pv[:-2]) / (2. * pv.dx)
