@@ -74,7 +74,7 @@ def calculate_energy_conversion_ratio(v1, v2, h1, h2, h_p1, h_p2):
     h1_0 = h_p1; h2_0 = h_p2
     P_0 = g * np.sum(h1_0**2 + eps * h2_0**2 + 2 * eps * h1_0 * h2_0)
     K_g = np.mean(h1) * np.sum(v1**2) + eps * np.mean(h2) * np.sum(v2**2)
-    return K_g / (P_0 - P_g)
+    return K_g / (P_0 - P_g), K_g
 
 
 
@@ -105,6 +105,7 @@ if __name__ == '__main__': #This part is only executed if this script runs as th
     scale_factors = np.power(10, np.arange(-2., 3.001, 0.25))
     a_array = scale_factors * R_rossby
     energy_conversion_ratios = np.zeros(len(a_array))
+    K_g = np.zeros(len(a_array))
     for i in range(0, len(a_array)):
         L = a_array[i]*5
         dx = 2 * L / I
@@ -112,7 +113,7 @@ if __name__ == '__main__': #This part is only executed if this script runs as th
     
         v1, v2, h1, h2, h_p1, h_p2 = calculate_v(a_array[i])
         
-        energy_conversion_ratios[i] = calculate_energy_conversion_ratio(v1, v2, h1, h2, h_p1, h_p2)
+        energy_conversion_ratios[i], K_g[i] = calculate_energy_conversion_ratio(v1, v2, h1, h2, h_p1, h_p2)
        
     #%%
     plt.figure(figsize = (10, 7))
@@ -122,3 +123,12 @@ if __name__ == '__main__': #This part is only executed if this script runs as th
     plt.title('Energy conversion ratio as a function of a/R')
     plt.savefig('2layer_energy_conversion_ratios.jpg', dpi = 240, bbox_inches = 'tight')
     plt.show()
+    
+    plt.figure(figsize = (10, 7))
+    plt.semilogx(scale_factors, K_g/np.max(K_g))
+    #plt.ylim([0.0, 0.5])
+    plt.xlabel('a/R'); plt.ylabel(r'KE')
+    plt.grid()
+    plt.title('Kinetic Energy as a function of a/R')
+    plt.savefig('2layer_KE.jpg', dpi = 240, bbox_inches = 'tight')
+    plt.show()   
