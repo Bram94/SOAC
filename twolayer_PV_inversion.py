@@ -78,10 +78,10 @@ def calculate_energy_conversion_ratio(v1, v2, h1, h2, h_p1, h_p2):
 
 
 
+#%%
 if __name__ == '__main__': #This part is only executed if this script runs as the main script, 
 #not when it is imported from another script
     if True:
-        #%%
         a = 800e3 / 1000.
         L = a * 5
         I = 400 #There are I grid points
@@ -98,6 +98,7 @@ if __name__ == '__main__': #This part is only executed if this script runs as th
         ax[0].plot(x[data_plot][1:-1], (v1[data_plot][2:] - v1[data_plot][:-2]) / (2 * dx), x[data_plot][1:-1], (v2[data_plot][2:] - v2[data_plot][:-2]) / (2 * dx))
         ax[1].plot(x[data_plot], H1 + h_p1[data_plot], 'b--', x[data_plot], h1[data_plot], 'b-')
         ax[2].plot(x[data_plot], H2 + h_p2[data_plot], 'r--', x[data_plot], h2[data_plot], 'r-')
+        plt.grid()
         plt.show()
 
     #%%
@@ -120,6 +121,7 @@ if __name__ == '__main__': #This part is only executed if this script runs as th
     plt.semilogx(scale_factors, energy_conversion_ratios)
     plt.ylim([0.0, 0.5])
     plt.xlabel('a/R'); plt.ylabel('K / $\Delta$P')
+    plt.grid()
     plt.title('Energy conversion ratio as a function of a/R')
     plt.savefig('2layer_energy_conversion_ratios.jpg', dpi = 240, bbox_inches = 'tight')
     plt.show()
@@ -129,6 +131,6 @@ if __name__ == '__main__': #This part is only executed if this script runs as th
     #plt.ylim([0.0, 0.5])
     plt.xlabel('a/R'); plt.ylabel(r'KE')
     plt.grid()
-    plt.title('Kinetic Energy as a function of a/R')
+    plt.title('Normalized Kinetic Energy as a function of a/R')
     plt.savefig('2layer_KE.jpg', dpi = 240, bbox_inches = 'tight')
     plt.show()   
